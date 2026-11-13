@@ -2,14 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { focusAreas, stats, team, trust, whatsappLink } from '../data.js';
 import HeroCarousel from './HeroCarousel.jsx';
+import { WhatsAppIcon } from './Icons.jsx';
 
 const words = ['body', 'skin', 'hair', 'strength', 'health'];
 const tickerItems = [...focusAreas, ...trust];
+const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const canHover = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
 export default function Hero() {
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
   const ref = useRef(null);
+  const spotRef = useRef(null);
+  const stageRef = useRef(null);
 
   // Track whether the hero is on screen so its animations can pause while scrolling below it.
   useEffect(() => {
@@ -19,10 +24,52 @@ export default function Hero() {
   }, []);
 
   useEffect(() => {
-    if (!visible || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!visible || reducedMotion()) return;
     const id = setInterval(() => setIndex((i) => (i + 1) % words.length), 2200);
     return () => clearInterval(id);
   }, [visible]);
+
+  // Cursor spotlight + gentle 3D tilt of the carousel. Transform-only, batched per frame.
+  useEffect(() => {
+    if (!canHover() || reducedMotion()) return;
+    const hero = ref.current;
+    let frame = 0;
+    let last = null;
+
+    const apply = () => {
+      frame = 0;
+      if (!last) return;
+      const { x, y } = last;
+      const r = hero.getBoundingClientRect();
+      if (spotRef.current) {
+        spotRef.current.style.transform = `translate3d(${x - r.left}px, ${y - r.top}px, 0)`;
+      }
+      const stage = stageRef.current;
+      if (stage) {
+        const s = stage.getBoundingClientRect();
+        const dx = (x - (s.left + s.width / 2)) / s.width;
+        const dy = (y - (s.top + s.height / 2)) / s.height;
+        const clamp = (v) => Math.max(-1, Math.min(1, v));
+        stage.style.transform = `perspective(1200px) rotateY(${clamp(dx) * 6}deg) rotateX(${clamp(dy) * -6}deg)`;
+      }
+    };
+    const onMove = (e) => {
+      last = { x: e.clientX, y: e.clientY };
+      if (!frame) frame = requestAnimationFrame(apply);
+    };
+    const onLeave = () => {
+      last = null;
+      if (stageRef.current) stageRef.current.style.transform = '';
+    };
+
+    hero.addEventListener('pointermove', onMove, { passive: true });
+    hero.addEventListener('pointerleave', onLeave);
+    return () => {
+      cancelAnimationFrame(frame);
+      hero.removeEventListener('pointermove', onMove);
+      hero.removeEventListener('pointerleave', onLeave);
+    };
+  }, []);
 
   return (
     <section ref={ref} className={`hero ${visible ? '' : 'is-offscreen'}`}>
@@ -31,6 +78,7 @@ export default function Hero() {
         <span className="hero__orb hero__orb--2" />
         <span className="hero__orb hero__orb--3" />
         <span className="hero__noise" />
+        <span ref={spotRef} className="hero__spotlight" />
       </div>
 
       <div className="container hero__inner">
@@ -41,12 +89,21 @@ export default function Hero() {
             <span className="hero__pulse" aria-hidden="true" />
           </p>
 
-          <h1 className="hero__title reveal" style={{ '--d': '.1s' }}>
-            Time to be
-            <span className="hero__accent">born again.</span>
+          <h1 className="hero__title">
+            <span className="hero__line">
+              {['Time', 'to', 'be'].map((w, i) => (
+                <span key={w} className="word-up" style={{ '--d': `${0.08 + i * 0.09}s` }}>{w}</span>
+              ))}
+            </span>
+            <span className="hero__accent-wrap word-up" style={{ '--d': '.38s' }}>
+              <span className="hero__accent">born again.</span>
+              <svg className="hero__swoosh" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M4 18 C 70 6, 170 4, 296 14" />
+              </svg>
+            </span>
           </h1>
 
-          <p className="hero__rotator reveal" style={{ '--d': '.2s' }}>
+          <p className="hero__rotator reveal" style={{ '--d': '.5s' }}>
             Rebuild your{' '}
             <span className="hero__word-box">
               <span className="hero__word" key={words[index]}>{words[index]}</span>
@@ -54,28 +111,26 @@ export default function Hero() {
             <span className="sr-only">, from the inside out.</span>
           </p>
 
-          <p className="hero__lead reveal" style={{ '--d': '.3s' }}>
+          <p className="hero__lead reveal" style={{ '--d': '.6s' }}>
             Scientifically designed, personalized wellness programs by Dr. Isacc Abbas and a
             multidisciplinary panel of medical experts — est. 2019 in Mumbai, now helping patients
             worldwide.
           </p>
 
-          <div className="hero__cta reveal" style={{ '--d': '.4s' }}>
-            <Link to="/contact" className="btn btn--primary btn--lg">
+          <div className="hero__cta reveal" style={{ '--d': '.7s' }}>
+            <Link to="/contact" className="btn btn--primary btn--lg btn--shine">
               Book Consultation
               <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
                 <path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </Link>
             <a href={whatsappLink()} target="_blank" rel="noreferrer" className="btn btn--glass btn--lg">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
-                <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.3z" />
-              </svg>
+              <WhatsAppIcon size={18} />
               WhatsApp us
             </a>
           </div>
 
-          <div className="hero__proof reveal" style={{ '--d': '.5s' }}>
+          <div className="hero__proof reveal" style={{ '--d': '.8s' }}>
             <Link to="/team" className="hero__panel">
               <span className="avatars">
                 {team.slice(0, 4).map((d) => <img key={d.name} src={d.photo} alt="" />)}
@@ -94,21 +149,38 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className="hero__media reveal" style={{ '--d': '.2s' }}>
-          <HeroCarousel />
+        <div className="hero__media reveal" style={{ '--d': '.3s' }}>
+          <div ref={stageRef} className="hero__stage">
+            <HeroCarousel />
+          </div>
+
+          <span className="bubble bubble--1" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path d="M6 10h2v4H6zM16 10h2v4h-2zM4 8h2v8H4zM18 8h2v8h-2zM8 11h8v2H8z" fill="currentColor" /></svg>
+          </span>
+          <span className="bubble bubble--2" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z" fill="currentColor" /></svg>
+          </span>
+          <span className="bubble bubble--3" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2l2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4z" fill="currentColor" /></svg>
+          </span>
         </div>
       </div>
 
       <div className="container">
-        <dl className="stats reveal" style={{ '--d': '.6s' }}>
+        <dl className="stats reveal" style={{ '--d': '.9s' }}>
           {stats.map(([value, label]) => (
             <div key={label}>
-              <dt>{value}</dt>
+              <dt><CountUp value={value} /></dt>
               <dd>{label}</dd>
             </div>
           ))}
         </dl>
       </div>
+
+      <a href="#below-hero" className="scroll-cue" aria-label="Scroll to explore">
+        <span className="scroll-cue__mouse"><span /></span>
+        Scroll to explore
+      </a>
 
       <div className="ticker" aria-hidden="true">
         <div className="ticker__track">
@@ -117,6 +189,42 @@ export default function Hero() {
           ))}
         </div>
       </div>
+      <span id="below-hero" />
     </section>
   );
+}
+
+// Counts a stat like "5,000+" or "2M+" up from zero the first time it scrolls into view.
+// Years (e.g. "2019") are shown as-is.
+function CountUp({ value }) {
+  const match = value.match(/^([\d,]+)(.*)$/);
+  const target = match ? Number(match[1].replace(/,/g, '')) : NaN;
+  const suffix = match ? match[2] : '';
+  const isYear = !suffix && target >= 1900 && target <= 2100;
+  const [shown, setShown] = useState(isYear || Number.isNaN(target) ? value : `0${suffix}`);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (isYear || Number.isNaN(target)) return;
+    if (reducedMotion()) { setShown(value); return; }
+    let raf = 0;
+    const io = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      io.disconnect();
+      const start = performance.now();
+      const dur = 1600;
+      const tick = (now) => {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const n = Math.round(target * eased);
+        setShown(t < 1 ? `${n.toLocaleString('en-US')}${suffix}` : value);
+        if (t < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    }, { threshold: 0.4 });
+    io.observe(ref.current);
+    return () => { io.disconnect(); cancelAnimationFrame(raf); };
+  }, [value, target, suffix, isYear]);
+
+  return <span ref={ref}>{shown}</span>;
 }

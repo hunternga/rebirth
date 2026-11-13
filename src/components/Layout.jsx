@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar.jsx';
 import Footer from './Footer.jsx';
 import WhatsAppFab from './WhatsAppFab.jsx';
+import WelcomeFab from './WelcomeFab.jsx';
 import { navLinks } from '../data.js';
 
 const titles = Object.fromEntries(navLinks.map(([label, path]) => [path, label]));
@@ -38,6 +39,7 @@ export default function Layout() {
         <Outlet />
       </main>
       <Footer />
+      <WelcomeFab />
       <WhatsAppFab />
     </>
   );
