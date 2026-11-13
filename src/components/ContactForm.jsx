@@ -3,8 +3,10 @@ import { formOptions, whatsappLink } from '../data.js';
 
 const empty = { firstName: '', lastName: '', source: '', goal: '', category: '', note: '' };
 
-export default function ContactForm() {
-  const [form, setForm] = useState(empty);
+// `initial` pre-fills fields (e.g. the goal or fee category of the button that opened it).
+// `bare` drops the card styling and title when the form sits inside the booking pop-up.
+export default function ContactForm({ initial, bare = false }) {
+  const [form, setForm] = useState(() => ({ ...empty, ...initial }));
   const [errors, setErrors] = useState({});
   const [sent, setSent] = useState(false);
 
@@ -38,7 +40,7 @@ export default function ContactForm() {
   };
 
   return (
-    <form className="card form" onSubmit={submit} noValidate>
+    <form className={bare ? 'form form--bare' : 'card form'} onSubmit={submit} noValidate>
       {sent ? (
         <div className="form__success" role="status">
           <h3>Thank you!</h3>
@@ -52,7 +54,7 @@ export default function ContactForm() {
         </div>
       ) : (
         <>
-          <h3 className="form__title">Book a consultation</h3>
+          {!bare && <h3 className="form__title">Book a consultation</h3>}
           <div className="form__row">
             <Field label="First name" name="firstName" value={form.firstName} onChange={update} error={errors.firstName} />
             <Field label="Last name" name="lastName" value={form.lastName} onChange={update} />

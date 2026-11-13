@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { navLinks } from '../data.js';
 import ThemeToggle from './ThemeToggle.jsx';
+import { BookButton } from './Booking.jsx';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -32,7 +33,7 @@ export default function Navbar() {
           {navLinks.map(([label, path]) => (
             <NavLink key={path} to={path} end={path === '/'}>{label}</NavLink>
           ))}
-          <Link to="/contact" className="btn btn--primary btn--sm">Book Consultation</Link>
+          <BookButton className="btn btn--primary btn--sm" onClick={() => setOpen(false)}>Book Consultation</BookButton>
         </nav>
 
         <div className="nav__actions">

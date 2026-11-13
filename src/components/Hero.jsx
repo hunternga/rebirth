@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { focusAreas, stats, team, trust, whatsappLink } from '../data.js';
 import HeroCarousel from './HeroCarousel.jsx';
 import { WhatsAppIcon } from './Icons.jsx';
+import { BookButton } from './Booking.jsx';
 
 const words = ['body', 'skin', 'hair', 'strength', 'health'];
 const tickerItems = [...focusAreas, ...trust];
@@ -14,7 +15,6 @@ export default function Hero() {
   const [visible, setVisible] = useState(true);
   const ref = useRef(null);
   const spotRef = useRef(null);
-  const stageRef = useRef(null);
 
   // Track whether the hero is on screen so its animations can pause while scrolling below it.
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function Hero() {
     return () => clearInterval(id);
   }, [visible]);
 
-  // Cursor spotlight + gentle 3D tilt of the carousel. Transform-only, batched per frame.
+  // Cursor spotlight. Transform-only, batched per frame.
   useEffect(() => {
     if (!canHover() || reducedMotion()) return;
     const hero = ref.current;
@@ -38,36 +38,19 @@ export default function Hero() {
 
     const apply = () => {
       frame = 0;
-      if (!last) return;
-      const { x, y } = last;
+      if (!last || !spotRef.current) return;
       const r = hero.getBoundingClientRect();
-      if (spotRef.current) {
-        spotRef.current.style.transform = `translate3d(${x - r.left}px, ${y - r.top}px, 0)`;
-      }
-      const stage = stageRef.current;
-      if (stage) {
-        const s = stage.getBoundingClientRect();
-        const dx = (x - (s.left + s.width / 2)) / s.width;
-        const dy = (y - (s.top + s.height / 2)) / s.height;
-        const clamp = (v) => Math.max(-1, Math.min(1, v));
-        stage.style.transform = `perspective(1200px) rotateY(${clamp(dx) * 6}deg) rotateX(${clamp(dy) * -6}deg)`;
-      }
+      spotRef.current.style.transform = `translate3d(${last.x - r.left}px, ${last.y - r.top}px, 0)`;
     };
     const onMove = (e) => {
       last = { x: e.clientX, y: e.clientY };
       if (!frame) frame = requestAnimationFrame(apply);
     };
-    const onLeave = () => {
-      last = null;
-      if (stageRef.current) stageRef.current.style.transform = '';
-    };
 
     hero.addEventListener('pointermove', onMove, { passive: true });
-    hero.addEventListener('pointerleave', onLeave);
     return () => {
       cancelAnimationFrame(frame);
       hero.removeEventListener('pointermove', onMove);
-      hero.removeEventListener('pointerleave', onLeave);
     };
   }, []);
 
@@ -118,12 +101,12 @@ export default function Hero() {
           </p>
 
           <div className="hero__cta reveal" style={{ '--d': '.7s' }}>
-            <Link to="/contact" className="btn btn--primary btn--lg btn--shine">
+            <BookButton className="btn btn--primary btn--lg btn--shine">
               Book Consultation
               <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
                 <path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </Link>
+            </BookButton>
             <a href={whatsappLink()} target="_blank" rel="noreferrer" className="btn btn--glass btn--lg">
               <WhatsAppIcon size={18} />
               WhatsApp us
@@ -150,19 +133,7 @@ export default function Hero() {
         </div>
 
         <div className="hero__media reveal" style={{ '--d': '.3s' }}>
-          <div ref={stageRef} className="hero__stage">
-            <HeroCarousel />
-          </div>
-
-          <span className="bubble bubble--1" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="22" height="22"><path d="M6 10h2v4H6zM16 10h2v4h-2zM4 8h2v8H4zM18 8h2v8h-2zM8 11h8v2H8z" fill="currentColor" /></svg>
-          </span>
-          <span className="bubble bubble--2" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z" fill="currentColor" /></svg>
-          </span>
-          <span className="bubble bubble--3" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2l2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4z" fill="currentColor" /></svg>
-          </span>
+          <HeroCarousel />
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { BookButton } from './Booking.jsx';
 
 const GREETINGS = [
   { text: 'Welcome', lang: 'en' },
@@ -16,7 +17,7 @@ const SPLIT = GREETINGS.map((g) => graphemes(g.text));
 
 const SEEN_KEY = 'rebirth-welcome-seen';
 const links = [
-  { to: '/contact', label: 'Book a consultation', icon: 'M8 2v3M16 2v3M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z' },
+  { book: true, label: 'Book a consultation', icon: 'M8 2v3M16 2v3M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z' },
   { to: '/testimonials', label: 'Watch success stories', icon: 'M8 5.5v13l11-6.5z' },
   { to: '/blog', label: 'Read health articles', icon: 'M4 5h16M4 10h16M4 15h10M4 20h7' },
 ];
@@ -69,17 +70,24 @@ export default function WelcomeFab() {
             Rebuild your health with a personalized protocol from our panel of 8 doctors.
           </p>
           <ul className="welcome-card__links">
-            {links.map((l) => (
-              <li key={l.to}>
-                <Link to={l.to}>
+            {links.map((l) => {
+              const inner = (
+                <>
                   <span className="welcome-card__icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" width="16" height="16"><path d={l.icon} /></svg>
                   </span>
                   {l.label}
                   <span className="welcome-card__arrow" aria-hidden="true">→</span>
-                </Link>
-              </li>
-            ))}
+                </>
+              );
+              return (
+                <li key={l.label}>
+                  {l.book
+                    ? <BookButton className="welcome-card__link" onClick={() => setOpen(false)}>{inner}</BookButton>
+                    : <Link to={l.to} className="welcome-card__link">{inner}</Link>}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

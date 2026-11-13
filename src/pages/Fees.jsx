@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { feeFaqs, feeIncludes, fees } from '../data.js';
+import { feeFaqs, feeIncludes, fees, formOptions } from '../data.js';
+import { BookButton } from '../components/Booking.jsx';
 import PageHeader from '../components/PageHeader.jsx';
 import SectionHead from '../components/SectionHead.jsx';
 import CtaBand from '../components/CtaBand.jsx';
@@ -18,15 +18,18 @@ export default function Fees() {
       <section className="section">
         <div className="container">
           <div className="grid grid--3 pricing">
-            {fees.map((f) => (
+            {fees.map((f, i) => (
               <article key={f.name} className={`card plan ${f.featured ? 'plan--featured' : ''}`}>
                 <h3>{f.name}</h3>
                 <p className="plan__price">{f.price}</p>
                 <p className="plan__unit">{f.unit}</p>
                 <p className="muted plan__text">{f.text}</p>
-                <Link to="/contact" className={`btn ${f.featured ? 'btn--primary' : 'btn--ghost'}`}>
+                <BookButton
+                  prefill={{ category: formOptions.category[i] }}
+                  className={`btn ${f.featured ? 'btn--primary' : 'btn--ghost'}`}
+                >
                   Book Consultation
-                </Link>
+                </BookButton>
               </article>
             ))}
           </div>
@@ -56,7 +59,7 @@ export default function Fees() {
               Simply choose your category when you fill in the booking form, and our team will guide
               you through the next steps.
             </p>
-            <Link to="/contact" className="btn btn--primary">Choose your category</Link>
+            <BookButton className="btn btn--primary">Choose your category</BookButton>
           </div>
         </div>
       </section>

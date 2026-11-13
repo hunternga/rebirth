@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
 import { whatsappLink } from '../data.js';
+import { BookButton } from './Booking.jsx';
 
 export default function CtaBand({
   title = 'Ready to start your rebirth?',
@@ -14,7 +14,7 @@ export default function CtaBand({
             <p>{text}</p>
           </div>
           <div className="cta-band__actions">
-            <Link to="/contact" className="btn btn--dark">Book Consultation</Link>
+            <BookButton className="btn btn--dark">Book Consultation</BookButton>
             <a href={whatsappLink()} target="_blank" rel="noreferrer" className="btn btn--outline-dark">
               Chat on WhatsApp
             </a>

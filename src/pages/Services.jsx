@@ -1,10 +1,20 @@
-import { Link } from 'react-router-dom';
 import { services, team } from '../data.js';
+import { BookButton } from '../components/Booking.jsx';
 import PageHeader from '../components/PageHeader.jsx';
 import ServiceIcon from '../components/ServiceIcon.jsx';
 import CtaBand from '../components/CtaBand.jsx';
 
 const photoOf = Object.fromEntries(team.map((d) => [d.name, d.photo]));
+
+// Which booking-form goal each program pre-selects.
+const goalFor = {
+  workout: 'Muscle Building',
+  nutrition: 'Nutrition & Lifestyle',
+  'hair-skin': 'Hair & Skin Health',
+  'weight-loss': 'Weight Loss / Obesity',
+  'cardiac-ortho': 'Cardiac Wellness',
+  lifestyle: 'Nutrition & Lifestyle',
+};
 
 export default function Services() {
   return (
@@ -48,7 +58,7 @@ export default function Services() {
                 </ul>
               </div>
 
-              <Link to="/contact" className="btn btn--primary">Get Started</Link>
+              <BookButton prefill={{ goal: goalFor[s.slug] }}>Get Started</BookButton>
             </div>
 
             <div className="service__details">

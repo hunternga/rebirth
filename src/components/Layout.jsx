@@ -4,6 +4,7 @@ import Navbar from './Navbar.jsx';
 import Footer from './Footer.jsx';
 import WhatsAppFab from './WhatsAppFab.jsx';
 import WelcomeFab from './WelcomeFab.jsx';
+import { BookingProvider } from './Booking.jsx';
 import { navLinks } from '../data.js';
 
 const titles = Object.fromEntries(navLinks.map(([label, path]) => [path, label]));
@@ -33,7 +34,7 @@ export default function Layout() {
   }, [pathname]);
 
   return (
-    <>
+    <BookingProvider>
       <Navbar />
       <main>
         <Outlet />
@@ -41,6 +42,6 @@ export default function Layout() {
       <Footer />
       <WelcomeFab />
       <WhatsAppFab />
-    </>
+    </BookingProvider>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { author, formatDate, posts, relatedPosts } from '../blog.js';
 import { whatsappLink } from '../data.js';
+import { BookButton } from '../components/Booking.jsx';
 import BlogCard from '../components/BlogCard.jsx';
 import ReadingTools, { SIZES, loadPrefs } from '../components/ReadingTools.jsx';
 import NotFound from './NotFound.jsx';
@@ -180,7 +181,8 @@ export default function BlogPost() {
               <p className="article-note">
                 This article is for educational purposes only and is not a substitute for personal
                 medical advice. If you have a medical condition, please consult a doctor before making
-                changes. For guidance specific to you, <Link to="/contact">book a consultation</Link>.
+                changes. For guidance specific to you,{' '}
+                <BookButton className="link-btn">book a consultation</BookButton>.
               </p>
             </article>
 
